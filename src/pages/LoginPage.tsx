@@ -66,7 +66,9 @@ const LoginPage: React.FC = () => {
     } catch (error: any) {
       console.error('Error logging in:', error);
       
-      if (error.message === 'Invalid login credentials') {
+      if (error.code === 'email_not_confirmed') {
+        setError('Por favor, verifique seu email para confirmar o cadastro antes de fazer login. Verifique sua caixa de entrada e spam.');
+      } else if (error.message === 'Invalid login credentials') {
         setError('Email ou senha incorretos. Tente novamente.');
       } else {
         setError('Ocorreu um erro durante o login. Tente novamente mais tarde.');
