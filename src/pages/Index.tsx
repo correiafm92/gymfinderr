@@ -1,9 +1,8 @@
-
 import React from 'react';
 import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { Dumbbell, MapPin, Star, Clock, Zap } from 'lucide-react';
+import { MapPin, Star, Dumbbell } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Index: React.FC = () => {
@@ -31,7 +30,7 @@ const Index: React.FC = () => {
         {/* Features */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl font-serif text-center mb-12">Como funciona o FitFinder</h2>
+            <h2 className="text-3xl font-serif text-center mb-12">Como funciona o GymFinder</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="bg-white p-8 rounded-lg shadow-sm flex flex-col items-center text-center animate-fade-in" style={{ animationDelay: '0.1s' }}>

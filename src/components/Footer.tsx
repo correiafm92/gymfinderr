@@ -9,7 +9,14 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="font-serif text-xl font-semibold">FitFinder Brazil</h3>
+            <div className="flex items-center space-x-2">
+              <img 
+                src="https://i.postimg.cc/GtTst108/A-3-D-cartoon-panda-serious-yet-smiling-sits-on-a-gym-floor-holding-a-dumbbell-He-wears-a-white.png" 
+                alt="GymFinder Logo" 
+                className="w-10 h-10 object-contain"
+              />
+              <h3 className="font-serif text-xl font-semibold">GymFinder</h3>
+            </div>
             <p className="text-sm text-gray-600 max-w-xs">
               Encontre as melhores academias no Brasil e comece sua jornada fitness agora.
             </p>
@@ -52,7 +59,7 @@ const Footer: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center text-sm text-gray-600">
                 <Mail size={16} className="mr-2" />
-                <span>contato@fitfinder.com.br</span>
+                <span>contato@gymfinder.com.br</span>
               </div>
               <div className="flex items-center text-sm text-gray-600">
                 <Phone size={16} className="mr-2" />
@@ -64,7 +71,7 @@ const Footer: React.FC = () => {
         
         <div className="mt-12 pt-8 border-t border-gray-200 text-center">
           <p className="text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} FitFinder Brazil. Todos os direitos reservados.
+            &copy; {new Date().getFullYear()} GymFinder. Todos os direitos reservados.
           </p>
         </div>
       </div>
