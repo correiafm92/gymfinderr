@@ -9,7 +9,69 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      gym_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          gym_id: string
+          id: string
+          user_name: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          gym_id: string
+          id?: string
+          user_name: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          gym_id?: string
+          id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
+      gym_ratings: {
+        Row: {
+          created_at: string
+          equipment_rating: number
+          gym_id: string
+          id: string
+          overall_rating: number
+          services_rating: number
+          space_rating: number
+          user_name: string
+          value_rating: number
+          water_rating: number
+        }
+        Insert: {
+          created_at?: string
+          equipment_rating: number
+          gym_id: string
+          id?: string
+          overall_rating: number
+          services_rating: number
+          space_rating: number
+          user_name: string
+          value_rating: number
+          water_rating: number
+        }
+        Update: {
+          created_at?: string
+          equipment_rating?: number
+          gym_id?: string
+          id?: string
+          overall_rating?: number
+          services_rating?: number
+          space_rating?: number
+          user_name?: string
+          value_rating?: number
+          water_rating?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

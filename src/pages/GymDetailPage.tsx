@@ -9,14 +9,28 @@ import RatingCategory from '../components/RatingCategory';
 import GymAmenities from '../components/GymAmenities';
 import PricingTable from '../components/PricingTable';
 import ImageGallery from '../components/ImageGallery';
+import GymComments from '../components/GymComments';
 import { MapPin, Phone, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '../hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { supabase } from '@/integrations/supabase/client';
 
 const GymDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [ratings, setRatings] = useState({
+    space: 0,
+    equipment: 0,
+    valueForMoney: 0,
+    services: 0,
+    water: 0,
+  });
+  const [userName, setUserName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const gym = getGymById(id || '');
 
@@ -52,13 +66,82 @@ const GymDetailPage: React.FC = () => {
     });
   };
 
-  const handleSubmitRating = () => {
-    toast({
-      title: "Avaliação enviada",
-      description: "Obrigado por avaliar esta academia!",
-      duration: 3000,
-    });
-    setIsRatingModalOpen(false);
+  const handleRatingChange = (category: keyof typeof ratings, value: number) => {
+    setRatings(prev => ({
+      ...prev,
+      [category]: value
+    }));
+  };
+
+  const calculateOverallRating = () => {
+    const { space, equipment, valueForMoney, services, water } = ratings;
+    return ((space + equipment + valueForMoney + services + water) / 5).toFixed(1);
+  };
+
+  const handleSubmitRating = async () => {
+    if (!userName.trim()) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Por favor, informe seu nome para enviar a avaliação.",
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('gym_ratings')
+        .insert([
+          {
+            gym_id: id,
+            user_name: userName,
+            space_rating: ratings.space,
+            equipment_rating: ratings.equipment,
+            value_rating: ratings.valueForMoney,
+            services_rating: ratings.services,
+            water_rating: ratings.water,
+            overall_rating: Number(calculateOverallRating())
+          },
+        ]);
+
+      if (error) {
+        console.error('Error submitting rating:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível enviar sua avaliação. Tente novamente mais tarde.",
+          duration: 3000,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      toast({
+        title: "Avaliação enviada",
+        description: "Obrigado por avaliar esta academia!",
+        duration: 3000,
+      });
+      
+      setIsRatingModalOpen(false);
+      setRatings({
+        space: 0,
+        equipment: 0,
+        valueForMoney: 0,
+        services: 0,
+        water: 0,
+      });
+      setUserName('');
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível enviar sua avaliação. Tente novamente mais tarde.",
+        duration: 3000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -155,8 +238,15 @@ const GymDetailPage: React.FC = () => {
           </div>
         </section>
         
-        {/* Pricing */}
+        {/* Comments Section */}
         <section className="py-8 px-4 sm:px-6 lg:px-8 bg-gray-50">
+          <div className="max-w-7xl mx-auto">
+            <GymComments gymId={id || ''} />
+          </div>
+        </section>
+        
+        {/* Pricing */}
+        <section className="py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl font-serif font-semibold mb-8">Planos e Preços</h2>
             <PricingTable pricing={gym.pricing} />
@@ -167,66 +257,94 @@ const GymDetailPage: React.FC = () => {
       <Footer />
       
       {/* Rating Modal */}
-      {isRatingModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full animate-scale-in">
-            <h3 className="text-xl font-semibold font-serif mb-4">Avaliar {gym.name}</h3>
-            
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium mb-1">Espaço</label>
-                <div className="flex">
-                  <RatingStars rating={0} size={24} />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Máquinas</label>
-                <div className="flex">
-                  <RatingStars rating={0} size={24} />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Custo-benefício</label>
-                <div className="flex">
-                  <RatingStars rating={0} size={24} />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Serviços gerais</label>
-                <div className="flex">
-                  <RatingStars rating={0} size={24} />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Água</label>
-                <div className="flex">
-                  <RatingStars rating={0} size={24} />
-                </div>
-              </div>
+      <Dialog open={isRatingModalOpen} onOpenChange={setIsRatingModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold font-serif">Avaliar {gym.name}</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 my-6">
+            <div className="space-y-2">
+              <Label htmlFor="userName">Seu nome</Label>
+              <Input 
+                id="userName" 
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                placeholder="Digite seu nome"
+              />
             </div>
             
-            <div className="flex justify-end space-x-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setIsRatingModalOpen(false)}
-                className="border-black text-black hover:bg-gray-100"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handleSubmitRating}
-                className="bg-black hover:bg-gray-800"
-              >
-                Enviar Avaliação
-              </Button>
+            <div className="space-y-4 pt-4">
+              <div className="flex justify-between items-center">
+                <Label className="font-medium">Espaço</Label>
+                <RatingStars 
+                  rating={ratings.space} 
+                  size={24} 
+                  interactive={true}
+                  onRatingChange={(value) => handleRatingChange('space', value)}
+                />
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <Label className="font-medium">Máquinas</Label>
+                <RatingStars 
+                  rating={ratings.equipment} 
+                  size={24} 
+                  interactive={true}
+                  onRatingChange={(value) => handleRatingChange('equipment', value)}
+                />
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <Label className="font-medium">Custo-benefício</Label>
+                <RatingStars 
+                  rating={ratings.valueForMoney} 
+                  size={24} 
+                  interactive={true}
+                  onRatingChange={(value) => handleRatingChange('valueForMoney', value)}
+                />
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <Label className="font-medium">Serviços gerais</Label>
+                <RatingStars 
+                  rating={ratings.services} 
+                  size={24} 
+                  interactive={true}
+                  onRatingChange={(value) => handleRatingChange('services', value)}
+                />
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <Label className="font-medium">Água</Label>
+                <RatingStars 
+                  rating={ratings.water} 
+                  size={24} 
+                  interactive={true}
+                  onRatingChange={(value) => handleRatingChange('water', value)}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsRatingModalOpen(false)}
+              className="border-black text-black hover:bg-gray-100"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSubmitRating}
+              className="bg-black hover:bg-gray-800"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
