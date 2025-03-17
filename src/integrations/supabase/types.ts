@@ -15,6 +15,7 @@ export type Database = {
           created_at: string
           gym_id: string
           id: string
+          user_id: string | null
           user_name: string
         }
         Insert: {
@@ -22,6 +23,7 @@ export type Database = {
           created_at?: string
           gym_id: string
           id?: string
+          user_id?: string | null
           user_name: string
         }
         Update: {
@@ -29,6 +31,7 @@ export type Database = {
           created_at?: string
           gym_id?: string
           id?: string
+          user_id?: string | null
           user_name?: string
         }
         Relationships: []
@@ -42,6 +45,7 @@ export type Database = {
           overall_rating: number
           services_rating: number
           space_rating: number
+          user_id: string | null
           user_name: string
           value_rating: number
           water_rating: number
@@ -54,6 +58,7 @@ export type Database = {
           overall_rating: number
           services_rating: number
           space_rating: number
+          user_id?: string | null
           user_name: string
           value_rating: number
           water_rating: number
@@ -66,9 +71,31 @@ export type Database = {
           overall_rating?: number
           services_rating?: number
           space_rating?: number
+          user_id?: string | null
           user_name?: string
           value_rating?: number
           water_rating?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          id: string
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          id: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          id?: string
+          updated_at?: string | null
+          username?: string | null
         }
         Relationships: []
       }

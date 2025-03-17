@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getGymById } from '../data/mockData';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -15,12 +15,12 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '../hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 
 const GymDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [ratings, setRatings] = useState({
     space: 0,
@@ -29,13 +29,32 @@ const GymDetailPage: React.FC = () => {
     services: 0,
     water: 0,
   });
-  const [userName, setUserName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   
   const gym = getGymById(id || '');
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+      
+      if (data.session?.user) {
+        // Fetch user profile
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.session.user.id)
+          .single();
+        
+        setProfile(profileData);
+      }
+    };
+    
+    checkUser();
   }, [id]);
 
   if (!gym) {
@@ -79,12 +98,14 @@ const GymDetailPage: React.FC = () => {
   };
 
   const handleSubmitRating = async () => {
-    if (!userName.trim()) {
+    if (!user) {
       toast({
-        title: "Nome obrigatório",
-        description: "Por favor, informe seu nome para enviar a avaliação.",
+        title: "Login necessário",
+        description: "Você precisa estar logado para avaliar.",
         duration: 3000,
       });
+      setIsRatingModalOpen(false);
+      navigate('/login');
       return;
     }
 
@@ -96,13 +117,14 @@ const GymDetailPage: React.FC = () => {
         .insert([
           {
             gym_id: id,
-            user_name: userName,
+            user_name: profile?.username || user.email,
             space_rating: ratings.space,
             equipment_rating: ratings.equipment,
             value_rating: ratings.valueForMoney,
             services_rating: ratings.services,
             water_rating: ratings.water,
-            overall_rating: Number(calculateOverallRating())
+            overall_rating: Number(calculateOverallRating()),
+            user_id: user.id
           },
         ]);
 
@@ -131,7 +153,6 @@ const GymDetailPage: React.FC = () => {
         services: 0,
         water: 0,
       });
-      setUserName('');
     } catch (error) {
       console.error('Error submitting rating:', error);
       toast({
@@ -142,6 +163,20 @@ const GymDetailPage: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleRatingButtonClick = () => {
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Você precisa estar logado para avaliar.",
+        duration: 3000,
+      });
+      navigate('/login');
+      return;
+    }
+    
+    setIsRatingModalOpen(true);
   };
 
   return (
@@ -188,7 +223,7 @@ const GymDetailPage: React.FC = () => {
                   <Button 
                     variant="outline" 
                     className="w-full border-black text-black hover:bg-gray-100"
-                    onClick={() => setIsRatingModalOpen(true)}
+                    onClick={handleRatingButtonClick}
                   >
                     <Star size={16} className="mr-2" />
                     Avaliar Academia
@@ -263,17 +298,7 @@ const GymDetailPage: React.FC = () => {
             <DialogTitle className="text-xl font-semibold font-serif">Avaliar {gym.name}</DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4 my-6">
-            <div className="space-y-2">
-              <Label htmlFor="userName">Seu nome</Label>
-              <Input 
-                id="userName" 
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                placeholder="Digite seu nome"
-              />
-            </div>
-            
+          <div className="space-y-4 my-6">            
             <div className="space-y-4 pt-4">
               <div className="flex justify-between items-center">
                 <Label className="font-medium">Espaço</Label>
