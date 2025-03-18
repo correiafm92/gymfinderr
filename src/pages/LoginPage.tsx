@@ -72,6 +72,8 @@ const LoginPage: React.FC = () => {
         setError('Email ou senha incorretos. Tente novamente.');
       } else if (error.message && error.message.includes('network')) {
         setError('Erro de conexão. Verifique sua conexão de internet e tente novamente.');
+      } else if (error.message && error.message.includes('provider is not enabled')) {
+        setError('Erro ao conectar com Google. O provedor Google não está habilitado. Por favor, use outro método de login.');
       } else {
         setError('Ocorreu um erro durante o login. Tente novamente mais tarde.');
       }
@@ -88,14 +90,24 @@ const LoginPage: React.FC = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            client_id: '606220446138-fnsjdhkqgger0n32djask4tdt8d3782f.apps.googleusercontent.com'
+          }
         }
       });
       
       if (error) throw error;
     } catch (error: any) {
       console.error('Error with Google login:', error);
-      setError('Erro ao fazer login com Google. Tente novamente mais tarde.');
+      
+      if (error.message && error.message.includes('provider is not enabled')) {
+        setError('Erro: O provedor Google não está habilitado na configuração do Supabase. Contate o administrador.');
+      } else if (error.message && error.message.includes('network')) {
+        setError('Erro de conexão. Verifique sua conexão de internet e tente novamente.');
+      } else {
+        setError('Erro ao fazer login com Google. Tente novamente mais tarde.');
+      }
     } finally {
       setLoading(false);
     }

@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Plus, Building } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -95,28 +95,45 @@ const Header: React.FC = () => {
           {!loading && (
             <>
               {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="focus:outline-none">
-                    <Avatar className="h-9 w-9 hover:ring-2 hover:ring-gray-200 transition-all cursor-pointer">
-                      <AvatarImage src={user.user_metadata?.avatar_url} />
-                      <AvatarFallback className="bg-black text-white">
-                        {getUserInitials()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Perfil</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleSignOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Sair</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center space-x-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigate('/register-gym')}
+                    className="border-black text-black hover:bg-gray-100"
+                  >
+                    <Building className="mr-2 h-4 w-4" />
+                    <span className="hidden sm:inline">Cadastrar Estabelecimento</span>
+                    <span className="sm:hidden">Cadastrar</span>
+                  </Button>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="focus:outline-none">
+                      <Avatar className="h-9 w-9 hover:ring-2 hover:ring-gray-200 transition-all cursor-pointer">
+                        <AvatarImage src={user.user_metadata?.avatar_url} />
+                        <AvatarFallback className="bg-black text-white">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Perfil</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/register-gym')}>
+                        <Building className="mr-2 h-4 w-4" />
+                        <span>Cadastrar Estabelecimento</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Sair</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               ) : (
                 <div className="flex space-x-2">
                   <Button 

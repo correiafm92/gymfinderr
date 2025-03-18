@@ -24,6 +24,9 @@ const Footer: React.FC = () => {
               <a href="https://www.instagram.com/gymfinders/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-black transition-colors">
                 <Instagram size={20} />
               </a>
+              <a href="mailto:contato@gymfinder.com.br" className="text-gray-600 hover:text-black transition-colors">
+                <Mail size={20} />
+              </a>
             </div>
           </div>
           
@@ -33,7 +36,7 @@ const Footer: React.FC = () => {
               <Link to="/" className="text-sm text-gray-600 hover:text-black transition-colors">Início</Link>
               <Link to="/about" className="text-sm text-gray-600 hover:text-black transition-colors">Sobre</Link>
               <Link to="/contact" className="text-sm text-gray-600 hover:text-black transition-colors">Contato</Link>
-              <a href="#" className="text-sm text-gray-600 hover:text-black transition-colors">Para Academias</a>
+              <Link to="/register-gym" className="text-sm text-gray-600 hover:text-black transition-colors">Cadastrar Estabelecimento</Link>
             </nav>
           </div>
           

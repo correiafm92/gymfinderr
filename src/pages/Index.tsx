@@ -1,3 +1,4 @@
+
 import React from 'react';
 import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
@@ -63,40 +64,40 @@ const Index: React.FC = () => {
         {/* Popular Cities */}
         <section className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl font-serif text-center mb-12">Cidades Populares</h2>
+            <h2 className="text-3xl font-serif text-center mb-12">Academias em Destaque</h2>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Link to="/gyms/São Paulo/São Paulo" className="group relative h-48 overflow-hidden rounded-lg shadow-md animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                <img src="/sao-paulo.jpg" alt="São Paulo" className="w-full h-full object-cover brightness-75 transition-transform duration-500 group-hover:scale-110" />
+              <div className="group relative h-48 overflow-hidden rounded-lg shadow-md animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                <img src="https://i.postimg.cc/y87CyN2y/download-17.jpg" alt="Academia Destaque" className="w-full h-full object-cover brightness-75 transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4 text-white">
-                  <h3 className="text-xl font-serif font-medium">São Paulo</h3>
+                  <h3 className="text-xl font-serif font-medium">Smart Fit</h3>
                 </div>
-              </Link>
+              </div>
               
-              <Link to="/gyms/Rio de Janeiro/Rio de Janeiro" className="group relative h-48 overflow-hidden rounded-lg shadow-md animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                <img src="/rio.jpg" alt="Rio de Janeiro" className="w-full h-full object-cover brightness-75 transition-transform duration-500 group-hover:scale-110" />
+              <div className="group relative h-48 overflow-hidden rounded-lg shadow-md animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                <img src="https://i.postimg.cc/ZK8hNNsq/download-18.jpg" alt="Academia Destaque" className="w-full h-full object-cover brightness-75 transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4 text-white">
-                  <h3 className="text-xl font-serif font-medium">Rio de Janeiro</h3>
+                  <h3 className="text-xl font-serif font-medium">BluesFit</h3>
                 </div>
-              </Link>
+              </div>
               
-              <Link to="/gyms/Minas Gerais/Belo Horizonte" className="group relative h-48 overflow-hidden rounded-lg shadow-md animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                <img src="/belo-horizonte.jpg" alt="Belo Horizonte" className="w-full h-full object-cover brightness-75 transition-transform duration-500 group-hover:scale-110" />
+              <div className="group relative h-48 overflow-hidden rounded-lg shadow-md animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                <img src="https://i.postimg.cc/4xwkLggk/Google-Images.jpg" alt="Academia Destaque" className="w-full h-full object-cover brightness-75 transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4 text-white">
-                  <h3 className="text-xl font-serif font-medium">Belo Horizonte</h3>
+                  <h3 className="text-xl font-serif font-medium">Academia Runner</h3>
                 </div>
-              </Link>
+              </div>
               
-              <Link to="/gyms/Rio Grande do Sul/Porto Alegre" className="group relative h-48 overflow-hidden rounded-lg shadow-md animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                <img src="/porto-alegre.jpg" alt="Porto Alegre" className="w-full h-full object-cover brightness-75 transition-transform duration-500 group-hover:scale-110" />
+              <div className="group relative h-48 overflow-hidden rounded-lg shadow-md animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                <img src="https://i.postimg.cc/hGjFN5DJ/Ironberg-ct.jpg" alt="Academia Destaque" className="w-full h-full object-cover brightness-75 transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4 text-white">
-                  <h3 className="text-xl font-serif font-medium">Porto Alegre</h3>
+                  <h3 className="text-xl font-serif font-medium">IronBerg</h3>
                 </div>
-              </Link>
+              </div>
             </div>
           </div>
         </section>
