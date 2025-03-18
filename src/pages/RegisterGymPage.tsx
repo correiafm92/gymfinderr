@@ -94,19 +94,23 @@ const RegisterGymPage: React.FC = () => {
         navigate('/login');
       } else {
         // Check if user already has a gym
-        const { data: gymData } = await supabase
-          .from('gyms')
-          .select('id')
-          .eq('owner_id', data.session.user.id)
-          .maybeSingle();
-        
-        if (gymData) {
-          toast({
-            title: "Estabelecimento já cadastrado",
-            description: "Você já possui um estabelecimento cadastrado. Você será redirecionado para a página de edição.",
-            duration: 3000,
-          });
-          navigate('/edit-gym');
+        try {
+          const { data: gymData } = await supabase
+            .from('gyms')
+            .select('id')
+            .eq('owner_id', data.session.user.id)
+            .maybeSingle();
+          
+          if (gymData) {
+            toast({
+              title: "Estabelecimento já cadastrado",
+              description: "Você já possui um estabelecimento cadastrado. Você será redirecionado para a página de edição.",
+              duration: 3000,
+            });
+            navigate('/edit-gym');
+          }
+        } catch (error) {
+          console.error("Error checking for existing gym:", error);
         }
       }
     };
@@ -200,47 +204,53 @@ const RegisterGymPage: React.FC = () => {
       }
       
       // Create gym record in database
-      const gymId = uuidv4();
-      const { error } = await supabase
-        .from('gyms')
-        .insert([
-          {
-            id: gymId,
-            name: data.name,
-            description: data.description,
-            short_description: data.shortDescription,
-            state: data.state,
-            city: data.city,
-            address: data.address,
-            phone: data.phone,
-            website: data.website || null,
-            instagram: data.instagram || null,
-            opening_hours: data.openingHours,
-            amenities: data.amenities,
-            daily_price: parseFloat(data.daily),
-            monthly_price: parseFloat(data.monthly),
-            quarterly_price: parseFloat(data.quarterly),
-            yearly_price: parseFloat(data.yearly),
-            images: imageUrls,
-            main_image: imageUrls.length > 0 ? imageUrls[0] : null,
-            owner_id: user.id,
-            status: 'active', // Auto-approve gym
-            created_at: new Date(),
-          }
-        ]);
+      try {
+        const gymId = uuidv4();
+        const { error } = await supabase
+          .from('gyms')
+          .insert([
+            {
+              id: gymId,
+              name: data.name,
+              description: data.description,
+              short_description: data.shortDescription,
+              state: data.state,
+              city: data.city,
+              address: data.address,
+              phone: data.phone,
+              website: data.website || null,
+              instagram: data.instagram || null,
+              opening_hours: data.openingHours,
+              amenities: data.amenities,
+              daily_price: parseFloat(data.daily),
+              monthly_price: parseFloat(data.monthly),
+              quarterly_price: parseFloat(data.quarterly),
+              yearly_price: parseFloat(data.yearly),
+              images: imageUrls,
+              main_image: imageUrls.length > 0 ? imageUrls[0] : null,
+              owner_id: user.id,
+              status: 'active', // Auto-approve gym
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }
+          ]);
 
-      if (error) {
-        console.error('Error creating gym:', error);
-        throw new Error('Erro ao cadastrar academia. Tente novamente.');
+        if (error) {
+          console.error('Error creating gym:', error);
+          throw new Error('Erro ao cadastrar academia. Tente novamente.');
+        }
+        
+        toast({
+          title: "Academia cadastrada com sucesso!",
+          description: "Seu estabelecimento foi cadastrado e já está disponível para visualização.",
+          duration: 5000,
+        });
+        
+        navigate(`/gym/${gymId}`);
+      } catch (error) {
+        console.error('Error inserting gym data:', error);
+        throw new Error('Erro ao inserir dados da academia. Tente novamente.');
       }
-      
-      toast({
-        title: "Academia cadastrada com sucesso!",
-        description: "Seu estabelecimento foi cadastrado e já está disponível para visualização.",
-        duration: 5000,
-      });
-      
-      navigate(`/gym/${gymId}`);
     } catch (error: any) {
       console.error('Error registering gym:', error);
       toast({

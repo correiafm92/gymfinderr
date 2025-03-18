@@ -78,6 +78,81 @@ export type Database = {
         }
         Relationships: []
       }
+      gyms: {
+        Row: {
+          address: string
+          amenities: string[]
+          city: string
+          created_at: string
+          daily_price: number
+          description: string
+          id: string
+          images: string[] | null
+          instagram: string | null
+          main_image: string | null
+          monthly_price: number
+          name: string
+          opening_hours: string
+          owner_id: string
+          phone: string
+          quarterly_price: number
+          short_description: string
+          state: string
+          status: string
+          updated_at: string
+          website: string | null
+          yearly_price: number
+        }
+        Insert: {
+          address: string
+          amenities: string[]
+          city: string
+          created_at?: string
+          daily_price: number
+          description: string
+          id?: string
+          images?: string[] | null
+          instagram?: string | null
+          main_image?: string | null
+          monthly_price: number
+          name: string
+          opening_hours: string
+          owner_id: string
+          phone: string
+          quarterly_price: number
+          short_description: string
+          state: string
+          status?: string
+          updated_at?: string
+          website?: string | null
+          yearly_price: number
+        }
+        Update: {
+          address?: string
+          amenities?: string[]
+          city?: string
+          created_at?: string
+          daily_price?: number
+          description?: string
+          id?: string
+          images?: string[] | null
+          instagram?: string | null
+          main_image?: string | null
+          monthly_price?: number
+          name?: string
+          opening_hours?: string
+          owner_id?: string
+          phone?: string
+          quarterly_price?: number
+          short_description?: string
+          state?: string
+          status?: string
+          updated_at?: string
+          website?: string | null
+          yearly_price?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

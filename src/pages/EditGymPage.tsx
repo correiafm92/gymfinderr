@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -119,58 +120,69 @@ const EditGymPage: React.FC = () => {
       }
       
       // Load gym data
-      const { data: gymData, error } = await supabase
-        .from('gyms')
-        .select('*')
-        .eq('owner_id', data.session.user.id)
-        .maybeSingle();
-      
-      if (error || !gymData) {
+      try {
+        const { data: gymData, error } = await supabase
+          .from('gyms')
+          .select('*')
+          .eq('owner_id', data.session.user.id)
+          .maybeSingle();
+        
+        if (error || !gymData) {
+          toast({
+            title: "Erro ao carregar dados",
+            description: "Você não possui um estabelecimento cadastrado. Você será redirecionado para a página de cadastro.",
+            variant: "destructive",
+            duration: 3000,
+          });
+          navigate('/register-gym');
+          return;
+        }
+        
+        // Set gym ID
+        setGymId(gymData.id);
+        
+        // Set existing images
+        if (gymData.images && Array.isArray(gymData.images)) {
+          setExistingImages(gymData.images);
+        }
+        
+        // Set form values
+        const stateValue = gymData.state || '';
+        form.reset({
+          name: gymData.name || '',
+          description: gymData.description || '',
+          shortDescription: gymData.short_description || '',
+          state: stateValue,
+          city: gymData.city || '',
+          address: gymData.address || '',
+          phone: gymData.phone || '',
+          website: gymData.website || '',
+          instagram: gymData.instagram || '',
+          openingHours: gymData.opening_hours || '',
+          amenities: gymData.amenities || [],
+          daily: gymData.daily_price?.toString() || '',
+          monthly: gymData.monthly_price?.toString() || '',
+          quarterly: gymData.quarterly_price?.toString() || '',
+          yearly: gymData.yearly_price?.toString() || '',
+        });
+        
+        // Load cities for the selected state
+        if (stateValue) {
+          const stateAbbr = BRAZILIAN_STATES.find(state => state.name === stateValue)?.abbr || '';
+          setCities(CITIES_BY_STATE[stateAbbr] || []);
+        }
+        
+        setLoadingData(false);
+      } catch (error) {
+        console.error("Error loading gym data:", error);
         toast({
           title: "Erro ao carregar dados",
-          description: "Você não possui um estabelecimento cadastrado. Você será redirecionado para a página de cadastro.",
+          description: "Ocorreu um erro ao carregar os dados do seu estabelecimento.",
           variant: "destructive",
           duration: 3000,
         });
         navigate('/register-gym');
-        return;
       }
-      
-      // Set gym ID
-      setGymId(gymData.id);
-      
-      // Set existing images
-      if (gymData.images && Array.isArray(gymData.images)) {
-        setExistingImages(gymData.images);
-      }
-      
-      // Set form values
-      const stateValue = gymData.state || '';
-      form.reset({
-        name: gymData.name || '',
-        description: gymData.description || '',
-        shortDescription: gymData.short_description || '',
-        state: stateValue,
-        city: gymData.city || '',
-        address: gymData.address || '',
-        phone: gymData.phone || '',
-        website: gymData.website || '',
-        instagram: gymData.instagram || '',
-        openingHours: gymData.opening_hours || '',
-        amenities: gymData.amenities || [],
-        daily: gymData.daily_price?.toString() || '',
-        monthly: gymData.monthly_price?.toString() || '',
-        quarterly: gymData.quarterly_price?.toString() || '',
-        yearly: gymData.yearly_price?.toString() || '',
-      });
-      
-      // Load cities for the selected state
-      if (stateValue) {
-        const stateAbbr = BRAZILIAN_STATES.find(state => state.name === stateValue)?.abbr || '';
-        setCities(CITIES_BY_STATE[stateAbbr] || []);
-      }
-      
-      setLoadingData(false);
     };
     
     checkUserAndLoadGym();
@@ -268,7 +280,7 @@ const EditGymPage: React.FC = () => {
           yearly_price: parseFloat(data.yearly),
           images: allImages,
           main_image: allImages.length > 0 ? allImages[0] : null,
-          updated_at: new Date(),
+          updated_at: new Date().toISOString(), // Convert Date to string
         })
         .eq('id', gymId);
 

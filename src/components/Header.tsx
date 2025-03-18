@@ -37,13 +37,21 @@ const Header: React.FC = () => {
       
       // Check if user has a gym registered
       if (data.session?.user) {
-        const { data: gymData, error } = await supabase
-          .from('gyms')
-          .select('id')
-          .eq('owner_id', data.session.user.id)
-          .maybeSingle();
-        
-        setHasGym(!!gymData);
+        try {
+          const { data: gymData, error } = await supabase
+            .from('gyms')
+            .select('id')
+            .eq('owner_id', data.session.user.id)
+            .maybeSingle();
+          
+          if (error) {
+            console.error('Error checking for gym:', error);
+          } else {
+            setHasGym(!!gymData);
+          }
+        } catch (error) {
+          console.error('Error checking for gym:', error);
+        }
       }
       
       return () => {
