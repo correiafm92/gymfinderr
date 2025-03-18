@@ -13,7 +13,7 @@ const AboutPage: React.FC = () => {
         <section className="py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-serif font-semibold mb-6 text-center animate-fade-in">
-              Sobre o FitFinder Brazil
+              Sobre o GymFinder
             </h1>
             <p className="text-xl text-gray-600 mb-12 text-center animate-fade-in" style={{ animationDelay: '0.1s' }}>
               Conectando pessoas a academias em todo o Brasil
@@ -21,11 +21,11 @@ const AboutPage: React.FC = () => {
             
             <div className="prose prose-lg max-w-none animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <p>
-                O FitFinder Brazil nasceu da necessidade de facilitar a busca por academias de qualidade em todo o território brasileiro. Nossa missão é conectar pessoas que buscam uma vida mais saudável com as melhores opções de academias disponíveis em sua região.
+                O GymFinder nasceu da necessidade de facilitar a busca por academias de qualidade em todo o território brasileiro. Nossa missão é conectar pessoas que buscam uma vida mais saudável com as melhores opções de academias disponíveis em sua região.
               </p>
               
               <p>
-                Seja você um viajante que precisa de uma academia durante sua estadia em outra cidade, ou alguém que busca uma nova academia no seu bairro, o FitFinder Brazil oferece todas as informações necessárias para você tomar a melhor decisão.
+                Seja você um viajante que precisa de uma academia durante sua estadia em outra cidade, ou alguém que busca uma nova academia no seu bairro, o GymFinder oferece todas as informações necessárias para você tomar a melhor decisão.
               </p>
               
               <h2 className="font-serif text-2xl mt-12 mb-6">Nossa Missão</h2>
@@ -94,7 +94,7 @@ const AboutPage: React.FC = () => {
               
               <h2 className="font-serif text-2xl mt-12 mb-6">Para academias</h2>
               <p>
-                Se você é proprietário ou gerente de uma academia, o FitFinder Brazil também é para você! Cadastre seu estabelecimento em nossa plataforma e aumente sua visibilidade, atraindo novos clientes e recebendo feedback valioso dos usuários.
+                Se você é proprietário ou gerente de uma academia, o GymFinder também é para você! Cadastre seu estabelecimento em nossa plataforma e aumente sua visibilidade, atraindo novos clientes e recebendo feedback valioso dos usuários.
               </p>
               
               <div className="bg-gray-50 p-8 rounded-lg mt-8">

@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { Instagram, Facebook, Twitter, Mail, Phone } from 'lucide-react';
+import { Instagram, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
     <footer className="bg-white border-t border-gray-200 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <img 
@@ -21,14 +21,8 @@ const Footer: React.FC = () => {
               Encontre as melhores academias no Brasil e comece sua jornada fitness agora.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-600 hover:text-black transition-colors">
+              <a href="https://www.instagram.com/gymfinders/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-black transition-colors">
                 <Instagram size={20} />
-              </a>
-              <a href="#" className="text-gray-600 hover:text-black transition-colors">
-                <Facebook size={20} />
-              </a>
-              <a href="#" className="text-gray-600 hover:text-black transition-colors">
-                <Twitter size={20} />
               </a>
             </div>
           </div>
@@ -52,20 +46,6 @@ const Footer: React.FC = () => {
               <Link to="/gyms/Bahia/Salvador" className="text-sm text-gray-600 hover:text-black transition-colors">Salvador</Link>
               <Link to="/gyms/Rio Grande do Sul/Porto Alegre" className="text-sm text-gray-600 hover:text-black transition-colors">Porto Alegre</Link>
             </nav>
-          </div>
-          
-          <div className="space-y-4">
-            <h4 className="font-serif text-lg font-medium">Contato</h4>
-            <div className="space-y-2">
-              <div className="flex items-center text-sm text-gray-600">
-                <Mail size={16} className="mr-2" />
-                <span>contato@gymfinder.com.br</span>
-              </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <Phone size={16} className="mr-2" />
-                <span>(11) 99999-9999</span>
-              </div>
-            </div>
           </div>
         </div>
         
