@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
-import { FcGoogle } from 'react-icons/fc';
+import { LucideGithub } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -156,7 +156,7 @@ const LoginPage: React.FC = () => {
               className="w-full mb-4 border-gray-300"
               onClick={handleGoogleLogin}
             >
-              <FcGoogle className="mr-2 h-5 w-5" />
+              <LucideGithub className="mr-2 h-5 w-5" />
               Google
             </Button>
             
