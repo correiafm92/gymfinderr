@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User, Plus, Building } from 'lucide-react';
+import { LogOut, User, Edit, Building } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 const Header: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [hasGym, setHasGym] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -33,6 +34,17 @@ const Header: React.FC = () => {
           setUser(session?.user || null);
         }
       );
+      
+      // Check if user has a gym registered
+      if (data.session?.user) {
+        const { data: gymData, error } = await supabase
+          .from('gyms')
+          .select('id')
+          .eq('owner_id', data.session.user.id)
+          .maybeSingle();
+        
+        setHasGym(!!gymData);
+      }
       
       return () => {
         authListener.subscription.unsubscribe();
@@ -72,9 +84,9 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <Link to="/" className="flex items-center space-x-2 text-black">
           <img 
-            src="https://i.postimg.cc/GtTst108/A-3-D-cartoon-panda-serious-yet-smiling-sits-on-a-gym-floor-holding-a-dumbbell-He-wears-a-white.png" 
+            src="https://i.postimg.cc/Dyc8JNPB/485274479-1308336640469602-8601200871243927725-n.jpg" 
             alt="GymFinder Logo" 
-            className="w-10 h-10 object-contain"
+            className="w-10 h-10 object-contain rounded-full"
           />
           <span className="text-xl font-semibold font-serif">GymFinder</span>
         </Link>
@@ -96,16 +108,29 @@ const Header: React.FC = () => {
             <>
               {user ? (
                 <div className="flex items-center space-x-3">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => navigate('/register-gym')}
-                    className="border-black text-black hover:bg-gray-100"
-                  >
-                    <Building className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Cadastrar Estabelecimento</span>
-                    <span className="sm:hidden">Cadastrar</span>
-                  </Button>
+                  {!hasGym ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigate('/register-gym')}
+                      className="border-black text-black hover:bg-gray-100"
+                    >
+                      <Building className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Cadastrar Estabelecimento</span>
+                      <span className="sm:hidden">Cadastrar</span>
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigate('/edit-gym')}
+                      className="border-black text-black hover:bg-gray-100"
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Editar Estabelecimento</span>
+                      <span className="sm:hidden">Editar</span>
+                    </Button>
+                  )}
                   
                   <DropdownMenu>
                     <DropdownMenuTrigger className="focus:outline-none">
@@ -123,10 +148,17 @@ const Header: React.FC = () => {
                         <User className="mr-2 h-4 w-4" />
                         <span>Perfil</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/register-gym')}>
-                        <Building className="mr-2 h-4 w-4" />
-                        <span>Cadastrar Estabelecimento</span>
-                      </DropdownMenuItem>
+                      {!hasGym ? (
+                        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/register-gym')}>
+                          <Building className="mr-2 h-4 w-4" />
+                          <span>Cadastrar Estabelecimento</span>
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/edit-gym')}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          <span>Editar Estabelecimento</span>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleSignOut}>
                         <LogOut className="mr-2 h-4 w-4" />
                         <span>Sair</span>

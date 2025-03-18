@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,7 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { BRAZILIAN_STATES, CITIES_BY_STATE } from '@/data/mockData';
-import { MapPin, Upload, Clock, Phone, Globe, Instagram } from 'lucide-react';
+import { MapPin, Upload, Clock, Phone, Globe, Instagram, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,13 +52,16 @@ const gymSchema = z.object({
 
 type GymFormValues = z.infer<typeof gymSchema>;
 
-const RegisterGymPage: React.FC = () => {
+const EditGymPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [cities, setCities] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [gymId, setGymId] = useState<string | null>(null);
   
   const amenitiesList = [
     'Estacionamento',
@@ -78,41 +80,6 @@ const RegisterGymPage: React.FC = () => {
     'Piscina',
     'Boxe/MMA'
   ];
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      setUser(data.session?.user || null);
-      
-      if (!data.session?.user) {
-        toast({
-          title: "Acesso restrito",
-          description: "Você precisa estar logado para cadastrar uma academia.",
-          variant: "destructive",
-          duration: 3000,
-        });
-        navigate('/login');
-      } else {
-        // Check if user already has a gym
-        const { data: gymData } = await supabase
-          .from('gyms')
-          .select('id')
-          .eq('owner_id', data.session.user.id)
-          .maybeSingle();
-        
-        if (gymData) {
-          toast({
-            title: "Estabelecimento já cadastrado",
-            description: "Você já possui um estabelecimento cadastrado. Você será redirecionado para a página de edição.",
-            duration: 3000,
-          });
-          navigate('/edit-gym');
-        }
-      }
-    };
-    
-    checkUser();
-  }, [navigate, toast]);
 
   const form = useForm<GymFormValues>({
     resolver: zodResolver(gymSchema),
@@ -135,34 +102,112 @@ const RegisterGymPage: React.FC = () => {
     },
   });
 
+  useEffect(() => {
+    const checkUserAndLoadGym = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+      
+      if (!data.session?.user) {
+        toast({
+          title: "Acesso restrito",
+          description: "Você precisa estar logado para editar uma academia.",
+          variant: "destructive",
+          duration: 3000,
+        });
+        navigate('/login');
+        return;
+      }
+      
+      // Load gym data
+      const { data: gymData, error } = await supabase
+        .from('gyms')
+        .select('*')
+        .eq('owner_id', data.session.user.id)
+        .maybeSingle();
+      
+      if (error || !gymData) {
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Você não possui um estabelecimento cadastrado. Você será redirecionado para a página de cadastro.",
+          variant: "destructive",
+          duration: 3000,
+        });
+        navigate('/register-gym');
+        return;
+      }
+      
+      // Set gym ID
+      setGymId(gymData.id);
+      
+      // Set existing images
+      if (gymData.images && Array.isArray(gymData.images)) {
+        setExistingImages(gymData.images);
+      }
+      
+      // Set form values
+      const stateValue = gymData.state || '';
+      form.reset({
+        name: gymData.name || '',
+        description: gymData.description || '',
+        shortDescription: gymData.short_description || '',
+        state: stateValue,
+        city: gymData.city || '',
+        address: gymData.address || '',
+        phone: gymData.phone || '',
+        website: gymData.website || '',
+        instagram: gymData.instagram || '',
+        openingHours: gymData.opening_hours || '',
+        amenities: gymData.amenities || [],
+        daily: gymData.daily_price?.toString() || '',
+        monthly: gymData.monthly_price?.toString() || '',
+        quarterly: gymData.quarterly_price?.toString() || '',
+        yearly: gymData.yearly_price?.toString() || '',
+      });
+      
+      // Load cities for the selected state
+      if (stateValue) {
+        const stateAbbr = BRAZILIAN_STATES.find(state => state.name === stateValue)?.abbr || '';
+        setCities(CITIES_BY_STATE[stateAbbr] || []);
+      }
+      
+      setLoadingData(false);
+    };
+    
+    checkUserAndLoadGym();
+  }, [navigate, toast, form]);
+
   const watchState = form.watch('state');
 
   useEffect(() => {
-    if (watchState) {
+    if (watchState && !loadingData) {
       const stateAbbr = BRAZILIAN_STATES.find(state => state.name === watchState)?.abbr || '';
       setCities(CITIES_BY_STATE[stateAbbr] || []);
       form.setValue('city', '');
-    } else {
+    } else if (!loadingData) {
       setCities([]);
     }
-  }, [watchState, form]);
+  }, [watchState, form, loadingData]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
-      setUploadedImages(prevImages => [...prevImages, ...filesArray].slice(0, 6));
+      setUploadedImages(prevImages => [...prevImages, ...filesArray].slice(0, 6 - existingImages.length));
     }
   };
 
-  const removeImage = (index: number) => {
+  const removeUploadedImage = (index: number) => {
     setUploadedImages(prevImages => prevImages.filter((_, i) => i !== index));
+  };
+  
+  const removeExistingImage = (index: number) => {
+    setExistingImages(prevImages => prevImages.filter((_, i) => i !== index));
   };
 
   const onSubmit = async (data: GymFormValues) => {
-    if (!user) {
+    if (!user || !gymId) {
       toast({
         title: "Erro de autenticação",
-        description: "Você precisa estar logado para cadastrar uma academia.",
+        description: "Você precisa estar logado para editar uma academia.",
         variant: "destructive",
         duration: 3000,
       });
@@ -173,8 +218,8 @@ const RegisterGymPage: React.FC = () => {
     setLoading(true);
     
     try {
-      // Upload images to Supabase storage
-      const imageUrls: string[] = [];
+      // Upload new images to Supabase storage
+      const newImageUrls: string[] = [];
       
       if (uploadedImages.length > 0) {
         for (const image of uploadedImages) {
@@ -195,57 +240,55 @@ const RegisterGymPage: React.FC = () => {
             .from('gym_images')
             .getPublicUrl(filePath);
             
-          imageUrls.push(publicUrl.publicUrl);
+          newImageUrls.push(publicUrl.publicUrl);
         }
       }
       
-      // Create gym record in database
-      const gymId = uuidv4();
+      // Combine existing and new images
+      const allImages = [...existingImages, ...newImageUrls];
+      
+      // Update gym record in database
       const { error } = await supabase
         .from('gyms')
-        .insert([
-          {
-            id: gymId,
-            name: data.name,
-            description: data.description,
-            short_description: data.shortDescription,
-            state: data.state,
-            city: data.city,
-            address: data.address,
-            phone: data.phone,
-            website: data.website || null,
-            instagram: data.instagram || null,
-            opening_hours: data.openingHours,
-            amenities: data.amenities,
-            daily_price: parseFloat(data.daily),
-            monthly_price: parseFloat(data.monthly),
-            quarterly_price: parseFloat(data.quarterly),
-            yearly_price: parseFloat(data.yearly),
-            images: imageUrls,
-            main_image: imageUrls.length > 0 ? imageUrls[0] : null,
-            owner_id: user.id,
-            status: 'active', // Auto-approve gym
-            created_at: new Date(),
-          }
-        ]);
+        .update({
+          name: data.name,
+          description: data.description,
+          short_description: data.shortDescription,
+          state: data.state,
+          city: data.city,
+          address: data.address,
+          phone: data.phone,
+          website: data.website || null,
+          instagram: data.instagram || null,
+          opening_hours: data.openingHours,
+          amenities: data.amenities,
+          daily_price: parseFloat(data.daily),
+          monthly_price: parseFloat(data.monthly),
+          quarterly_price: parseFloat(data.quarterly),
+          yearly_price: parseFloat(data.yearly),
+          images: allImages,
+          main_image: allImages.length > 0 ? allImages[0] : null,
+          updated_at: new Date(),
+        })
+        .eq('id', gymId);
 
       if (error) {
-        console.error('Error creating gym:', error);
-        throw new Error('Erro ao cadastrar academia. Tente novamente.');
+        console.error('Error updating gym:', error);
+        throw new Error('Erro ao atualizar academia. Tente novamente.');
       }
       
       toast({
-        title: "Academia cadastrada com sucesso!",
-        description: "Seu estabelecimento foi cadastrado e já está disponível para visualização.",
+        title: "Academia atualizada com sucesso!",
+        description: "As informações do seu estabelecimento foram atualizadas.",
         duration: 5000,
       });
       
       navigate(`/gym/${gymId}`);
     } catch (error: any) {
-      console.error('Error registering gym:', error);
+      console.error('Error updating gym:', error);
       toast({
-        title: "Erro ao cadastrar academia",
-        description: error.message || "Ocorreu um erro ao cadastrar seu estabelecimento. Tente novamente mais tarde.",
+        title: "Erro ao atualizar academia",
+        description: error.message || "Ocorreu um erro ao atualizar seu estabelecimento. Tente novamente mais tarde.",
         variant: "destructive",
         duration: 3000,
       });
@@ -254,7 +297,19 @@ const RegisterGymPage: React.FC = () => {
     }
   };
 
-  if (!user) {
+  if (loadingData) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-grow pt-24 px-4 pb-20 flex items-center justify-center">
+          <p className="text-xl">Carregando dados...</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!user || !gymId) {
     return null; // User is redirected in the useEffect
   }
 
@@ -264,8 +319,8 @@ const RegisterGymPage: React.FC = () => {
       
       <main className="flex-grow pt-24 px-4 pb-20">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-serif font-semibold text-center mb-2">Cadastrar Estabelecimento</h1>
-          <p className="text-gray-600 text-center mb-8">Preencha o formulário abaixo com as informações do seu estabelecimento</p>
+          <h1 className="text-3xl font-serif font-semibold text-center mb-2">Editar Estabelecimento</h1>
+          <p className="text-gray-600 text-center mb-8">Atualize as informações do seu estabelecimento</p>
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -505,34 +560,63 @@ const RegisterGymPage: React.FC = () => {
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                 <h2 className="text-xl font-medium mb-4">Fotos do Estabelecimento</h2>
                 
-                <div className="mb-4">
-                  <Label htmlFor="images" className="block mb-2">
-                    Adicione até 6 fotos do seu estabelecimento
-                  </Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input
-                      id="images"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                    <label htmlFor="images" className="cursor-pointer">
-                      <Upload className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">
-                        Clique para fazer upload ou arraste as imagens aqui
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        PNG, JPG ou JPEG (máx. 10MB por arquivo)
-                      </p>
-                    </label>
+                {existingImages.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium mb-2">Imagens Atuais</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {existingImages.map((image, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={image}
+                            alt={`Existing image ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-md"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeExistingImage(index)}
+                            className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-70"
+                            aria-label="Remove image"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+                
+                {existingImages.length < 6 && (
+                  <div className="mb-4">
+                    <Label htmlFor="images" className="block mb-2">
+                      {existingImages.length > 0 
+                        ? `Adicione mais fotos (${6 - existingImages.length} restantes)` 
+                        : 'Adicione até 6 fotos do seu estabelecimento'}
+                    </Label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors">
+                      <input
+                        id="images"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <label htmlFor="images" className="cursor-pointer">
+                        <Upload className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">
+                          Clique para fazer upload ou arraste as imagens aqui
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          PNG, JPG ou JPEG (máx. 10MB por arquivo)
+                        </p>
+                      </label>
+                    </div>
+                  </div>
+                )}
                 
                 {uploadedImages.length > 0 && (
                   <div className="mt-4">
-                    <h3 className="text-sm font-medium mb-2">Imagens Adicionadas</h3>
+                    <h3 className="text-sm font-medium mb-2">Novas Imagens para Upload</h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {uploadedImages.map((image, index) => (
                         <div key={index} className="relative">
@@ -543,10 +627,11 @@ const RegisterGymPage: React.FC = () => {
                           />
                           <button
                             type="button"
-                            onClick={() => removeImage(index)}
+                            onClick={() => removeUploadedImage(index)}
                             className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-70"
+                            aria-label="Remove image"
                           >
-                            ✕
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       ))}
@@ -677,7 +762,7 @@ const RegisterGymPage: React.FC = () => {
                 className="w-full bg-black hover:bg-gray-800"
                 disabled={loading}
               >
-                {loading ? 'Cadastrando...' : 'Cadastrar Estabelecimento'}
+                {loading ? 'Salvando...' : 'Salvar Alterações'}
               </Button>
             </form>
           </Form>
@@ -689,4 +774,4 @@ const RegisterGymPage: React.FC = () => {
   );
 };
 
-export default RegisterGymPage;
+export default EditGymPage;
