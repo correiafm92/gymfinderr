@@ -1,46 +1,69 @@
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { MapPin, Star, Dumbbell } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const featuredGyms = [
-  {
-    id: 'gym1',
-    name: 'Ironberg Academia',
-    image: 'https://i.postimg.cc/hGjFN5DJ/Ironberg-ct.jpg',
-    location: { city: 'São Paulo', state: 'São Paulo' },
-    rating: 4.8,
-    reviews: 124,
-  },
-  {
-    id: 'gym2',
-    name: 'Fitness Center',
-    image: 'https://i.postimg.cc/y87CyN2y/download-17.jpg',
-    location: { city: 'Rio de Janeiro', state: 'Rio de Janeiro' },
-    rating: 4.6,
-    reviews: 98,
-  },
-  {
-    id: 'gym3',
-    name: 'Power Gym',
-    image: 'https://i.postimg.cc/ZK8hNNsq/download-18.jpg',
-    location: { city: 'Curitiba', state: 'Paraná' },
-    rating: 4.7,
-    reviews: 75,
-  },
-  {
-    id: 'gym4',
-    name: 'Elite Training',
-    image: 'https://i.postimg.cc/4xwkLggk/Google-Images.jpg',
-    location: { city: 'Belo Horizonte', state: 'Minas Gerais' },
-    rating: 4.5,
-    reviews: 62,
-  },
-];
+import { supabase } from '@/integrations/supabase/client';
+import GymCard from '@/components/GymCard';
+import { Gym } from '@/components/GymCard';
 
 const Index: React.FC = () => {
+  const [featuredGyms, setFeaturedGyms] = useState<Gym[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchGyms();
+  }, []);
+
+  const fetchGyms = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('gyms')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      if (error) {
+        console.error('Error fetching gyms:', error);
+        return;
+      }
+
+      if (data) {
+        // Transform data to match the Gym interface
+        const transformedGyms = data.map(gym => ({
+          id: gym.id,
+          name: gym.name,
+          address: gym.address,
+          shortDescription: gym.short_description,
+          mainImage: gym.main_image,
+          rating: {
+            space: 4.5,
+            equipment: 4.5,
+            valueForMoney: 4.5,
+            services: 4.5,
+            water: 4.5,
+            overall: 4.5
+          },
+          reviews: 0,
+          pricing: {
+            daily: gym.daily_price,
+            monthly: gym.monthly_price,
+            quarterly: gym.quarterly_price,
+            yearly: gym.yearly_price
+          }
+        }));
+
+        setFeaturedGyms(transformedGyms);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -95,22 +118,29 @@ const Index: React.FC = () => {
           </div>
         </section>
         
-        {/* Popular Cities */}
+        {/* Academias em Destaque */}
         <section className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl font-serif text-center mb-12">Academias em Destaque</h2>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {featuredGyms.map(gym => (
-                <div key={gym.id} className="group relative h-48 overflow-hidden rounded-lg shadow-md animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                  <img src={gym.image} alt={gym.name} className="w-full h-full object-cover brightness-75 transition-transform duration-500 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 p-4 text-white">
-                    <h3 className="text-xl font-serif font-medium">{gym.name}</h3>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-center py-10">
+                <p>Carregando academias...</p>
+              </div>
+            ) : featuredGyms.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {featuredGyms.map((gym) => (
+                  <GymCard key={gym.id} gym={gym} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <p>Nenhuma academia encontrada. Seja o primeiro a cadastrar!</p>
+                <Link to="/register-gym" className="inline-block mt-4 bg-black text-white py-2 px-4 rounded">
+                  Cadastrar Academia
+                </Link>
+              </div>
+            )}
           </div>
         </section>
         

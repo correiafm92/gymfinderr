@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getGymById } from '../data/mockData';
@@ -10,7 +9,7 @@ import GymAmenities from '../components/GymAmenities';
 import PricingTable from '../components/PricingTable';
 import ImageGallery from '../components/ImageGallery';
 import GymComments from '../components/GymComments';
-import { MapPin, Phone, Star } from 'lucide-react';
+import { MapPin, Phone, Star, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '../hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -43,7 +42,6 @@ const GymDetailPage: React.FC = () => {
       setUser(data.session?.user || null);
       
       if (data.session?.user) {
-        // Fetch user profile
         const { data: profileData } = await supabase
           .from('profiles')
           .select('*')
@@ -212,13 +210,9 @@ const GymDetailPage: React.FC = () => {
                   <h2 className="text-xl font-serif font-semibold mb-4">Informações de Contato</h2>
                   
                   <div className="flex items-center mb-4">
-                    <Phone size={20} className="mr-3" />
-                    <span className="font-medium">{gym.phone}</span>
+                    <Mail size={20} className="mr-3" />
+                    <span className="font-medium">{gym.email || "contato@academia.com"}</span>
                   </div>
-                  
-                  <Button onClick={handleCallGym} className="w-full bg-black hover:bg-gray-800 mb-4">
-                    Ligar para Academia
-                  </Button>
                   
                   <Button 
                     variant="outline" 

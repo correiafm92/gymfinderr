@@ -33,6 +33,7 @@ export interface Gym {
   monthly_price?: number;
   quarterly_price?: number;
   yearly_price?: number;
+  email?: string;
 }
 
 interface GymCardProps {

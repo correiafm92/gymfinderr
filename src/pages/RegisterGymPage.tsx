@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,7 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { BRAZILIAN_STATES, CITIES_BY_STATE } from '@/data/mockData';
-import { MapPin, Upload, Clock, Phone, Globe, Instagram } from 'lucide-react';
+import { MapPin, Upload, Clock, Phone, Globe, Instagram, Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,10 +36,12 @@ const gymSchema = z.object({
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
   description: z.string().min(20, 'Descrição deve ter pelo menos 20 caracteres'),
   shortDescription: z.string().min(10, 'Descrição curta deve ter pelo menos 10 caracteres'),
+  cnpj: z.string().min(14, 'CNPJ deve ter 14 dígitos'),
   state: z.string().min(1, 'Selecione um estado'),
   city: z.string().min(1, 'Selecione uma cidade'),
   address: z.string().min(5, 'Endereço deve ter pelo menos 5 caracteres'),
   phone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
+  email: z.string().email('Digite um e-mail válido'),
   website: z.string().optional(),
   instagram: z.string().optional(),
   openingHours: z.string().min(5, 'Horário de funcionamento deve ser informado'),
@@ -124,10 +125,12 @@ const RegisterGymPage: React.FC = () => {
       name: '',
       description: '',
       shortDescription: '',
+      cnpj: '',
       state: '',
       city: '',
       address: '',
       phone: '',
+      email: '',
       website: '',
       instagram: '',
       openingHours: '',
@@ -214,10 +217,12 @@ const RegisterGymPage: React.FC = () => {
               name: data.name,
               description: data.description,
               short_description: data.shortDescription,
+              cnpj: data.cnpj,
               state: data.state,
               city: data.city,
               address: data.address,
               phone: data.phone,
+              email: data.email,
               website: data.website || null,
               instagram: data.instagram || null,
               opening_hours: data.openingHours,
@@ -292,6 +297,23 @@ const RegisterGymPage: React.FC = () => {
                         <FormControl>
                           <Input {...field} placeholder="Ex: Academia PowerFit" />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="cnpj"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CNPJ</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Ex: 12345678000123" />
+                        </FormControl>
+                        <FormDescription>
+                          Informe o CNPJ do estabelecimento (apenas números)
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -439,6 +461,28 @@ const RegisterGymPage: React.FC = () => {
                               {...field} 
                               className="pl-9" 
                               placeholder="(11) 99999-9999"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input 
+                              {...field} 
+                              type="email"
+                              className="pl-9" 
+                              placeholder="contato@suaacademia.com.br"
                             />
                           </div>
                         </FormControl>
