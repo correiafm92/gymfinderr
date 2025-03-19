@@ -19,6 +19,49 @@ const GymListPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchGyms();
+    
+    // Set up real-time subscription for newly added gyms
+    const subscription = supabase
+      .channel('public:gyms')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'gyms' 
+      }, (payload) => {
+        // When a new gym is added, add it to the state
+        const newGym = payload.new as any;
+        setGyms(currentGyms => [
+          ...currentGyms, 
+          {
+            id: newGym.id,
+            name: newGym.name,
+            address: newGym.address,
+            shortDescription: newGym.short_description,
+            mainImage: newGym.main_image,
+            email: newGym.email,
+            rating: {
+              space: 4.5,
+              equipment: 4.5,
+              valueForMoney: 4.5,
+              services: 4.5,
+              water: 4.5,
+              overall: 4.5
+            },
+            reviews: 0,
+            pricing: {
+              daily: newGym.daily_price,
+              monthly: newGym.monthly_price,
+              quarterly: newGym.quarterly_price,
+              yearly: newGym.yearly_price
+            }
+          }
+        ]);
+      })
+      .subscribe();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [state, city]);
 
   const fetchGyms = async () => {
@@ -56,6 +99,7 @@ const GymListPage: React.FC = () => {
           address: gym.address,
           shortDescription: gym.short_description,
           mainImage: gym.main_image,
+          email: gym.email,
           rating: {
             space: 4.5,
             equipment: 4.5,
@@ -75,11 +119,13 @@ const GymListPage: React.FC = () => {
 
         setGyms(transformedGyms);
         
-        toast({
-          title: "Academias carregadas",
-          description: `Mostrando academias${city ? ` em ${city}` : ''}${state ? `, ${state}` : ''}`,
-          duration: 3000,
-        });
+        if (state || city) {
+          toast({
+            title: "Academias carregadas",
+            description: `Mostrando academias${city ? ` em ${city}` : ''}${state ? `, ${state}` : ''}`,
+            duration: 3000,
+          });
+        }
       }
     } catch (error) {
       console.error('Error:', error);

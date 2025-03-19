@@ -1,6 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getGymById } from '../data/mockData';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import RatingStars from '../components/RatingStars';
@@ -9,12 +9,13 @@ import GymAmenities from '../components/GymAmenities';
 import PricingTable from '../components/PricingTable';
 import ImageGallery from '../components/ImageGallery';
 import GymComments from '../components/GymComments';
-import { MapPin, Phone, Star, Mail } from 'lucide-react';
+import { MapPin, Star, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '../hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
+import { Gym } from '@/components/GymCard';
 
 const GymDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -31,9 +32,9 @@ const GymDetailPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [gym, setGym] = useState<Gym | null>(null);
+  const [loading, setLoading] = useState(true);
   
-  const gym = getGymById(id || '');
-
   useEffect(() => {
     window.scrollTo(0, 0);
     
@@ -53,7 +54,87 @@ const GymDetailPage: React.FC = () => {
     };
     
     checkUser();
+    fetchGym();
   }, [id]);
+  
+  const fetchGym = async () => {
+    try {
+      setLoading(true);
+      
+      if (!id) return;
+      
+      const { data, error } = await supabase
+        .from('gyms')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching gym:', error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os detalhes da academia",
+          variant: "destructive",
+          duration: 3000,
+        });
+        return;
+      }
+      
+      if (data) {
+        // Transform data to match the Gym interface
+        const transformedGym = {
+          id: data.id,
+          name: data.name,
+          address: data.address,
+          shortDescription: data.short_description,
+          mainImage: data.main_image,
+          email: data.email,
+          cnpj: data.cnpj,
+          description: data.description,
+          amenities: data.amenities,
+          images: data.images || [],
+          rating: {
+            space: 4.5,
+            equipment: 4.5,
+            valueForMoney: 4.5,
+            services: 4.5,
+            water: 4.5,
+            overall: 4.5
+          },
+          reviews: 0,
+          pricing: {
+            daily: data.daily_price,
+            monthly: data.monthly_price,
+            quarterly: data.quarterly_price,
+            yearly: data.yearly_price
+          }
+        };
+        
+        setGym(transformedGym);
+      } else {
+        setGym(null);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setGym(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-grow pt-24 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto text-center py-16">
+            <h1 className="text-3xl font-serif mb-4">Carregando...</h1>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!gym) {
     return (
@@ -74,15 +155,7 @@ const GymDetailPage: React.FC = () => {
       </div>
     );
   }
-
-  const handleCallGym = () => {
-    toast({
-      title: "Contato",
-      description: `Ligando para ${gym.phone}`,
-      duration: 3000,
-    });
-  };
-
+  
   const handleRatingChange = (category: keyof typeof ratings, value: number) => {
     setRatings(prev => ({
       ...prev,
