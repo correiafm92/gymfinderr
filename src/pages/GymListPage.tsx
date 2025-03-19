@@ -39,6 +39,10 @@ const GymListPage: React.FC = () => {
             shortDescription: newGym.short_description,
             mainImage: newGym.main_image,
             email: newGym.email,
+            cnpj: newGym.cnpj,
+            description: newGym.description,
+            amenities: newGym.amenities,
+            images: newGym.images,
             rating: {
               space: 4.5,
               equipment: 4.5,
@@ -100,6 +104,10 @@ const GymListPage: React.FC = () => {
           shortDescription: gym.short_description,
           mainImage: gym.main_image,
           email: gym.email,
+          cnpj: gym.cnpj,
+          description: gym.description,
+          amenities: gym.amenities,
+          images: gym.images,
           rating: {
             space: 4.5,
             equipment: 4.5,

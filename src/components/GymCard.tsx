@@ -35,6 +35,9 @@ export interface Gym {
   yearly_price?: number;
   email?: string;
   cnpj?: string;
+  description?: string;
+  amenities?: string[];
+  images?: string[];
 }
 
 interface GymCardProps {

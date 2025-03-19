@@ -15,6 +15,23 @@ const Index: React.FC = () => {
 
   useEffect(() => {
     fetchGyms();
+    
+    // Set up real-time subscription for newly added gyms
+    const subscription = supabase
+      .channel('public:gyms')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'gyms' 
+      }, (payload) => {
+        // When a new gym is added, check if we need to update the featured gyms
+        fetchGyms();
+      })
+      .subscribe();
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchGyms = async () => {
@@ -38,6 +55,11 @@ const Index: React.FC = () => {
           address: gym.address,
           shortDescription: gym.short_description,
           mainImage: gym.main_image,
+          email: gym.email,
+          cnpj: gym.cnpj,
+          description: gym.description,
+          amenities: gym.amenities,
+          images: gym.images,
           rating: {
             space: 4.5,
             equipment: 4.5,

@@ -82,7 +82,7 @@ const GymDetailPage: React.FC = () => {
       
       if (data) {
         // Transform data to match the Gym interface
-        const transformedGym = {
+        const transformedGym: Gym = {
           id: data.id,
           name: data.name,
           address: data.address,
@@ -274,7 +274,7 @@ const GymDetailPage: React.FC = () => {
                 </div>
                 
                 <div className="mb-8 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-                  <ImageGallery images={gym.images} altText={gym.name} />
+                  <ImageGallery images={gym.images || []} altText={gym.name} />
                 </div>
               </div>
               
@@ -308,7 +308,7 @@ const GymDetailPage: React.FC = () => {
             <p className="text-gray-700 leading-relaxed mb-8">{gym.description}</p>
             
             <h3 className="text-xl font-serif font-semibold mb-4">Infraestrutura e Serviços</h3>
-            <GymAmenities amenities={gym.amenities} />
+            <GymAmenities amenities={gym.amenities || []} />
           </div>
         </section>
         
